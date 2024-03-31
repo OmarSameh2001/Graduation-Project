@@ -111,7 +111,10 @@ function App() {
       >
         {!images && (
           <>
-            <h1 className="py-5">Kindly choose an image to upload</h1>
+            <h1 className="pt-5">Kindly choose an image to upload</h1>
+            <p className="py-2 text-primary">
+              Note: For best results clean the tire
+            </p>
             <input
               style={{ cursor: "pointer" }}
               type="file"
@@ -121,7 +124,12 @@ function App() {
           </>
         )}
         {images && !apiResponse && !errorRes && (
-          <h1 className="py-2">Press Upload to process your image</h1>
+          <>
+            <h1 className="pt-2">Press Upload to process your image</h1>
+            <p className="text-primary">
+              Note: For best results clean the tire
+            </p>
+          </>
         )}
         {images && apiResponse && (
           <h1 className="py-2">Press reset to test new image</h1>
@@ -131,6 +139,7 @@ function App() {
             Error occured try uploading again or press reset
           </h1>
         )}
+
         {images && (
           <div
             style={{
@@ -138,31 +147,57 @@ function App() {
               maxWidth: "500px",
               height: "400px",
               borderRadius: "8px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
             }}
+            className="px-2"
           >
             <img
               src={link ? link : `data:image/jpeg;base64,${images}`}
               alt="Uploaded"
-              style={{ maxWidth: "100%", height: "100%", objectFit: "cover" }}
+              style={{
+                maxWidth: "100%",
+                height: "100%",
+                objectFit: "cover",
+                borderRadius: "8px",
+              }}
             />
           </div>
         )}
         {apiResponse ? (
-          <div style={{ marginTop: "20px" }} className="row">
+          <div
+            style={{ marginTop: "20px", marginInline: "auto" }}
+            className="row"
+          >
             <p className="col-auto">
-              Your Tire is: {apiResponse.top}, with confidence{" "}
+              Your Tire is:{" "}
+              <span
+                style={{
+                  color:
+                    apiResponse.top === "Good"
+                      ? "green"
+                      : apiResponse.top === "Defected"
+                      ? "red"
+                      : "black",
+                  fontWeight: "bold",
+                }}
+              >
+                {apiResponse.top}
+              </span>
+              , with confidence{" "}
               {(parseFloat(apiResponse.confidence) * 100).toFixed(2)}%
             </p>
 
             {apiResponse.top === "Defected" && (
               <a
                 href="https://www.fitandfix.com"
-                className="col-auto bg-success text-white"
+                className="col-auto text-white"
                 target="_blank"
                 rel="noreferrer"
                 style={{
                   fontSize: "20px",
-                  color: "green",
+                  background: "#032c81",
                 }}
               >
                 Redirect to specialist
@@ -170,21 +205,32 @@ function App() {
             )}
           </div>
         ) : (
-          <button
-            style={{ margin: "20px", minWidth: "10%" }}
-            className="btn bg-success text-white upload-button col-md-1"
-            disabled={
-              !images ||
-              loading ||
-              errorRes === "Request failed with status code 413"
-            }
-            onClick={() => {
-              hand();
-              setErrorRes(null);
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
-            {loading ? "Loading..." : "Upload"}
-          </button>
+            <button
+              style={{ margin: "20px", minWidth: "100%" }}
+              className="btn bg-success text-white upload-button"
+              disabled={!images || loading || errorRes}
+              onClick={() => {
+                hand();
+                setErrorRes(null);
+              }}
+            >
+              {loading ? "Loading..." : "Upload"}
+            </button>
+            {loading && (
+              <div
+                className="my-2 spinner-border"
+                role="status"
+                style={{ alignSelf: "center" }}
+              />
+            )}
+          </div>
         )}
         {errorRes === "Request failed with status code 413" ? (
           <>
@@ -202,7 +248,17 @@ function App() {
           </>
         ) : errorRes ? (
           <>
-            <p className="bg-danger">An error occurred, please try again</p>
+            <p className="bg-danger">
+              An error occurred, try compressing the image
+            </p>
+            <button
+              className="btn btn-primary"
+              style={{ minWidth: "10%" }}
+              onClick={() => handleImageCompress(raw)}
+              disabled={loading}
+            >
+              Compress{loading ? "ing..." : ""}
+            </button>
           </>
         ) : null}
         {compsize && (
@@ -216,6 +272,7 @@ function App() {
               style={{ margin: "15px", minWidth: "10%" }}
               className="btn bg-danger text-white col-md-1"
               onClick={resetStates}
+              disabled={loading}
             >
               Reset
             </button>

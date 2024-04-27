@@ -1,30 +1,31 @@
 import React, { useState } from "react";
 import "./App.css";
-import axios from "axios";
-import Navbar from "./Components/Navbar/Navbar";
-import Footer from "./Components/Footer/Footer";
-import "bootstrap/dist/css/bootstrap.min.css";
-import imageCompression from "browser-image-compression";
+import axios from "axios"; // Import axios for api calling
+import Navbar from "./Components/Navbar/Navbar"; // Import Navbar component
+import Footer from "./Components/Footer/Footer"; // Import Footer component
+import "bootstrap/dist/css/bootstrap.min.css"; // Import bootstrap
+import imageCompression from "browser-image-compression"; // import image compression to avoid API limits
 
 function App() {
+  // UseStates for handling project state management
   const [images, setImages] = useState(null);
-  const [apiResponse, setApiResponse] = useState(null); // State to store API response
+  const [apiResponse, setApiResponse] = useState(null);
   const [errorRes, setErrorRes] = useState(null);
   const [loading, setLoading] = useState(false);
   const [raw, setRaw] = useState(null);
   const [link, setLink] = useState(null);
   const [compsize, setCompsize] = useState(null);
-  const apikey = process.env.REACT_APP_API_KEY;
+  const apikey = process.env.REACT_APP_API_KEY; // hidding the api key for security reasons
 
   async function handleImageCompress(img) {
     const imageFile = img;
     const options = {
-      maxSizeMB: 2.9,
+      maxSizeMB: 2.9, // max size in MB
       useWebWorker: true,
     };
     setLoading(true);
     try {
-      const compressedFile = await imageCompression(imageFile, options);
+      const compressedFile = await imageCompression(imageFile, options); // compress image
       setLoading(false);
       const downloadLink = URL.createObjectURL(compressedFile);
       setLink(downloadLink);
@@ -45,6 +46,7 @@ function App() {
   }
 
   async function api(image) {
+    // API call to classify image
     try {
       setLoading(true);
       const response = await axios({
@@ -69,6 +71,7 @@ function App() {
     }
   }
   const handleFileInputChange = (event) => {
+    // Handle file input and convert to base64
     const file = event.target.files[0];
     const reader = new FileReader();
     setRaw(file);
@@ -85,7 +88,7 @@ function App() {
 
   function hand() {
     api(images);
-    //apiup(images);
+    // send image to api
   }
   function resetStates() {
     setApiResponse(null);
@@ -93,10 +96,11 @@ function App() {
     setErrorRes(null);
     setRaw(null);
     setCompsize(null);
+    setLink(null);
   }
   return (
     <>
-      <Navbar />
+      <Navbar /> {/* Navbar component */}
       <div
         style={{
           display: "flex",
@@ -109,6 +113,9 @@ function App() {
         }}
         className="App-header"
       >
+
+        {/* Now we will handle the Header */}
+        {/* If there is no image yet*/}
         {!images && (
           <>
             <h1 className="pt-5">Kindly choose an image to upload</h1>
@@ -123,6 +130,8 @@ function App() {
             />
           </>
         )}
+
+        {/* If There is an image but not uploaded to api*/}
         {images && !apiResponse && !errorRes && (
           <>
             <h1 className="pt-2">Press Upload to process your image</h1>
@@ -131,15 +140,20 @@ function App() {
             </p>
           </>
         )}
+
+        {/* Image uploaded and api response received */}
         {images && apiResponse && (
           <h1 className="py-2">Press reset to test new image</h1>
         )}
+
+        {/* Image uploaded and error occured */}
         {images && errorRes && (
           <h1 className="py-2">
             Error occured try uploading again or press reset
           </h1>
         )}
 
+        {/* If there is an image render it */}
         {images && (
           <div
             style={{
@@ -165,6 +179,8 @@ function App() {
             />
           </div>
         )}
+
+        {/* If there is an api response render it */}
         {apiResponse ? (
           <div
             style={{ marginTop: "20px", marginInline: "auto" }}
@@ -172,6 +188,7 @@ function App() {
           >
             <p className="col-auto">
               Your Tire is:{" "}
+              {/* Change color based on prediction */}
               <span
                 style={{
                   color:
@@ -189,6 +206,7 @@ function App() {
               {(parseFloat(apiResponse.confidence) * 100).toFixed(2)}%
             </p>
 
+            {/* Redirect to specialist if prediction is defected */}
             {apiResponse.top === "Defected" && (
               <a
                 href="https://www.fitandfix.com"
@@ -215,7 +233,7 @@ function App() {
             <button
               style={{ margin: "20px", minWidth: "100%" }}
               className="btn bg-success text-white upload-button"
-              disabled={!images || loading || errorRes}
+              disabled={!images || loading || errorRes} 
               onClick={() => {
                 hand();
                 setErrorRes(null);
@@ -232,6 +250,9 @@ function App() {
             )}
           </div>
         )}
+
+        
+        {/* Handling error types and compressing if needed */}
         {errorRes === "Request failed with status code 413" ? (
           <>
             <p className="bg-danger">
@@ -278,8 +299,24 @@ function App() {
             </button>
           </>
         )}
+        {/* Give feedback */}
+        {apiResponse && (
+              <a
+                href="https://forms.gle/pnFm3no8Eu8NL15YA"
+                className="col-auto text-white"
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  fontSize: "20px",
+                  background: "#032c81",
+                  paddingBottom: "5px",
+                }}
+              >
+                Write Feedback
+              </a>
+            )}
       </div>
-      <Footer />
+      <Footer /> {/* Footer component */}
     </>
   );
 }

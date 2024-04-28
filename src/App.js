@@ -154,7 +154,7 @@ function App() {
           style={{
             marginTop: "20px",
             maxWidth: "90vw",
-            height: "400px",
+            height: "300px",
             borderRadius: "8px",
             display: "flex",
             flexDirection: "column",

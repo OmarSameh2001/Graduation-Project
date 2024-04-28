@@ -6,6 +6,7 @@ import Footer from "./Components/Footer/Footer"; // Import Footer component
 import "bootstrap/dist/css/bootstrap.min.css"; // Import bootstrap
 import imageCompression from "browser-image-compression"; // import image compression to avoid API limits
 
+
 function App() {
   // UseStates for handling project state management
   const [images, setImages] = useState(null);
@@ -14,7 +15,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [large, setLarge] = useState(false);
   const [raw, setRaw] = useState(null);
-  const [link, setLink] = useState(null);
+  const [compimg, setCompimg] = useState(null);
   const [compsize, setCompsize] = useState(null);
   const apikey = process.env.REACT_APP_API_KEY; // hidding the api key for security reasons
 
@@ -29,7 +30,7 @@ function App() {
       const compressedFile = await imageCompression(imageFile, options); // compress image
       setLoading(false);
       const downloadLink = URL.createObjectURL(compressedFile);
-      setLink(downloadLink);
+      setCompimg(downloadLink);
       setErrorRes(null);
       setLarge(false);
 
@@ -102,35 +103,23 @@ function App() {
     setErrorRes(null);
     setRaw(null);
     setCompsize(null);
-    setLink(null);
+    setCompimg(null);
     setLarge(false);
   }
   return (
     <>
       <Navbar /> {/* Navbar component */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-        className="App-header"
-      >
-
+      <div style={{ minHeight: "80vh", textAlign: "center"}} className="App-header">
+        
         {/* Now we will handle the Header */}
+
         {/* If there is no image yet*/}
         {!images && (
           <>
-            <h1 className="pt-5">Kindly choose an image to upload</h1>
-            <p className="py-2 text-primary">
-              Note: For best results clean the tire
-            </p>
+            <h1 className="pt-5 px-1">Kindly choose an image to upload</h1>
+            
             <input
-              style={{ cursor: "pointer" }}
+              style={{ cursor: "pointer"}}
               type="file"
               accept="image/*"
               onChange={handleFileInputChange}
@@ -141,7 +130,7 @@ function App() {
         {/* If There is an image but not uploaded to api*/}
         {images && !apiResponse && !errorRes && (
           <>
-            <h1 className="pt-2">Press Upload to process your image</h1>
+            <h1 className="p-2">Press Upload to process your image</h1>
             <p className="text-primary">
               Note: For best results clean the tire
             </p>
@@ -160,42 +149,44 @@ function App() {
           </h1>
         )}
 
-        {/* If there is an image render it */}
-        {images && (
-          <div
+        {/* If there is an image render it if not render indicator */}
+        <div
+          style={{
+            marginTop: "20px",
+            maxWidth: "90vw",
+            height: "400px",
+            borderRadius: "8px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+          className="px-2"
+        >
+          <img
+            src={
+              !images
+                ? require("./Assets/Thread.jpg")
+                : compimg
+                ? compimg
+                : `data:image/jpeg;base64,${images}`
+            }
+            alt="Uploaded"
             style={{
-              marginTop: "20px",
-              maxWidth: "500px",
-              height: "400px",
+              maxWidth: "100%",
+              height: "100%",
               borderRadius: "8px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
             }}
-            className="px-2"
-          >
-            <img
-              src={link ? link : `data:image/jpeg;base64,${images}`}
-              alt="Uploaded"
-              style={{
-                maxWidth: "100%",
-                height: "100%",
-                objectFit: "cover",
-                borderRadius: "8px",
-              }}
-            />
-          </div>
-        )}
+          />
+        </div>
 
         {/* If there is an api response render it */}
         {apiResponse ? (
-          <div
+          <><div
             style={{ marginTop: "20px", marginInline: "auto" }}
             className="row"
           >
             <p className="col-auto">
-              Your Tire is:{" "}
-              {/* Change color based on prediction */}
+              Your Tire is: {/* Change color based on prediction */}
               <span
                 style={{
                   color:
@@ -213,7 +204,9 @@ function App() {
               {(parseFloat(apiResponse.confidence) * 100).toFixed(2)}%
             </p>
 
-            {/* Redirect to specialist if prediction is defected */}
+            
+          </div>
+          {/* Redirect to specialist if prediction is defected */}
             {apiResponse.top === "Defected" && (
               <a
                 href="https://www.fitandfix.com"
@@ -227,8 +220,8 @@ function App() {
               >
                 Redirect to specialist
               </a>
-            )}
-          </div>
+            )}</>
+          
         ) : (
           <div
             style={{
@@ -240,7 +233,7 @@ function App() {
             <button
               style={{ margin: "20px", minWidth: "100%" }}
               className="btn bg-success text-white upload-button"
-              disabled={!images || loading || errorRes || large} 
+              disabled={!images || loading || errorRes || large}
               onClick={() => {
                 hand();
                 setErrorRes(null);
@@ -258,7 +251,6 @@ function App() {
           </div>
         )}
 
-        
         {/* Handling error types and compressing if needed */}
         {errorRes === "Request failed with status code 413" || large ? (
           <>
@@ -308,20 +300,20 @@ function App() {
         )}
         {/* Give feedback */}
         {apiResponse && (
-              <a
-                href="https://forms.gle/pnFm3no8Eu8NL15YA"
-                className="col-auto text-white"
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  fontSize: "20px",
-                  background: "#032c81",
-                  paddingBottom: "5px",
-                }}
-              >
-                Write Feedback
-              </a>
-            )}
+          <a
+            href="https://forms.gle/pnFm3no8Eu8NL15YA"
+            className="col-auto text-white"
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              fontSize: "20px",
+              background: "#032c81",
+              paddingBottom: "5px",
+            }}
+          >
+            Write Feedback
+          </a>
+        )}
       </div>
       <Footer /> {/* Footer component */}
     </>

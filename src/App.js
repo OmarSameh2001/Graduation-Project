@@ -12,6 +12,7 @@ function App() {
   const [apiResponse, setApiResponse] = useState(null);
   const [errorRes, setErrorRes] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [large, setLarge] = useState(false);
   const [raw, setRaw] = useState(null);
   const [link, setLink] = useState(null);
   const [compsize, setCompsize] = useState(null);
@@ -30,6 +31,7 @@ function App() {
       const downloadLink = URL.createObjectURL(compressedFile);
       setLink(downloadLink);
       setErrorRes(null);
+      setLarge(false);
 
       // Read the compressedFile as base64 directly
       const reader = new FileReader();
@@ -75,6 +77,10 @@ function App() {
     const file = event.target.files[0];
     const reader = new FileReader();
     setRaw(file);
+    if (file.size >= 3 * 1024 * 1024) {
+      // Check if file size is 3 MB or smaller
+      setLarge(true);
+    }
     reader.onloadend = () => {
       const base64String = reader.result
         .replace("data:", "")
@@ -97,6 +103,7 @@ function App() {
     setRaw(null);
     setCompsize(null);
     setLink(null);
+    setLarge(false);
   }
   return (
     <>
@@ -233,7 +240,7 @@ function App() {
             <button
               style={{ margin: "20px", minWidth: "100%" }}
               className="btn bg-success text-white upload-button"
-              disabled={!images || loading || errorRes} 
+              disabled={!images || loading || errorRes || large} 
               onClick={() => {
                 hand();
                 setErrorRes(null);
@@ -253,7 +260,7 @@ function App() {
 
         
         {/* Handling error types and compressing if needed */}
-        {errorRes === "Request failed with status code 413" ? (
+        {errorRes === "Request failed with status code 413" || large ? (
           <>
             <p className="bg-danger">
               The image is too large, compress to upload
